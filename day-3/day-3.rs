@@ -9,11 +9,11 @@ fn part_one(data: &str) -> u64 {
 }
 
 fn part_two(data: &str) -> u64 {
-    let re = Regex::new(r"don't\(\).*?do\(\)").unwrap();
+    let re = Regex::new(r"(?ms)don't\(\).*?do\(\)").unwrap();
     part_one(&re.replace_all(data, ""))
 }
 
 fn main() {
-    let data = read_to_string("day-3/input.txt").unwrap().replace("\n", "");
+    let data = read_to_string("day-3/input.txt").unwrap();
     println!("Part One: {:?}\nPart Two: {:?}", part_one(&data), part_two(&data));
 }
