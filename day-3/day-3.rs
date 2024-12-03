@@ -15,5 +15,5 @@ fn part_two(data: &str) -> u64 {
 
 fn main() {
     let data = read_to_string("day-3/input.txt").unwrap();
-    println!("Part One: {:?}\nPart Two: {:?}", part_one(&data), part_two(&data));
+    println!("Part One: {}\nPart Two: {}", part_one(&data), part_two(&data));
 }
