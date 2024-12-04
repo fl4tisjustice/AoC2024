@@ -80,7 +80,7 @@ unsigned int partTwo(const std::vector<std::string> &input) {
             std::generate(partition.begin(), partition.end(), [&input, i, j, matchSize, n = 0]() mutable -> std::string {
                 return input[i + n++].substr(j, matchSize);
             });
-            counts += (countDiagonalMatches(partition, match) + countDiagonalMatches(transpose(partition), match)) / 2;
+            counts += countDiagonalMatches(partition, match) & countDiagonalMatches(transpose(partition), match);
         }
     }
 
