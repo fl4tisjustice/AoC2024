@@ -15,64 +15,82 @@ std::vector<std::string> getInput() {
     return input;
 }
 
-std::vector<std::string> transpose(std::vector<std::string> &data)  {
-    size_t newSize = data[0].length();
+std::vector<std::string> transpose(const std::vector<std::string> &data)  {
+    const size_t newSize = data[0].length();
     std::vector<std::string> transposed(newSize);
 
+    std::stringstream builder;
     for (size_t i = 0; i < newSize; i++) {
-        std::stringstream temp;
-        for (size_t j = 0; j < data.size(); j++) temp << data[j][newSize - i - 1];
-        transposed[i] = temp.str();
+        for (size_t j = 0; j < data.size(); j++) builder << data[j][newSize - i - 1];
+        transposed[i] = builder.str(); builder.str("");
     }
 
     return transposed;
 };
 
+unsigned int countMatches(const std::vector<std::string> &data, const std::string &match) {
+    unsigned int counts = 0;
+    std::string reverse(match); std::reverse(reverse.begin(), reverse.end());
 
-int partOne(std::vector<std::string> &input) {
+    for (size_t i = 0; i < data.size(); i++) {
+        size_t pos = 0;
+        while ((pos = data[i].find(match, pos)) != std::string::npos) { counts++; pos += match.length(); }
+
+        pos = 0;
+        while ((pos = data[i].find(reverse, pos)) != std::string::npos) { counts++; pos += match.length(); }
+    }
+    return counts;
+};
+
+unsigned int countDiagonalMatches(const std::vector<std::string> &data, const std::string &match) {
+    std::vector<std::string> diagonals;
+
+    std::stringstream diagonal;
+    for (size_t i = 0; i <= data.size() - match.length(); i++) {
+        for (size_t j = i; j < data[0].length(); j++) diagonal << data[j][j - i];
+        diagonals.push_back(diagonal.str()); diagonal.str("");
+
+        if (i == 0) continue;
+        for (size_t j = i; j < data[0].length(); j++) diagonal << data[j - i][j];
+        diagonals.push_back(diagonal.str()); diagonal.str("");
+    }
+
+    return countMatches(diagonals, match);
+};
+
+
+unsigned int partOne(const std::vector<std::string> &input) {
     auto transposed = transpose(input);
+    std::string match("XMAS");
 
-    auto countMatches = [](std::vector<std::string> &data) -> unsigned int {
-        unsigned int counts = 0;
-        for (size_t i = 0; i < data.size(); i++) {
-            size_t pos = 0;
-            while ((pos = data[i].find("XMAS", pos)) != std::string::npos) { counts++; pos += 4; }
+    return countMatches(input, match) +
+           countMatches(transposed, match) +
+           countDiagonalMatches(input, match) +
+           countDiagonalMatches(transposed, match);
+}
 
-            pos = 0;
-            while ((pos = data[i].find("SAMX", pos)) != std::string::npos) { counts++; pos += 4; }
+unsigned int partTwo(const std::vector<std::string> &input) {
+    const std::string match("MAS");
+    size_t matchSize = match.length();
+    size_t counts = 0;
+
+    std::vector<std::string> partition(matchSize);
+    for (size_t i = 0; i <= input[0].size() - matchSize; i++) {
+        for (size_t j = 0; j <= input[0].size() - matchSize; j++) {
+            std::generate(partition.begin(), partition.end(), [&input, i, j, matchSize, n = 0]() mutable -> std::string {
+                return input[i + n++].substr(j, matchSize);
+            });
+            counts += (countDiagonalMatches(partition, match) + countDiagonalMatches(transpose(partition), match)) / 2;
         }
-        return counts;
-    };
+    }
 
-    auto countDiagonalMatches = [&countMatches](std::vector<std::string> &data) -> unsigned int {
-        std::vector<std::string> diagonals;
-
-        for (size_t i = 0; i <= data.size() - 4; i++) {
-            std::stringstream diagonal;
-
-            if (i != 0) {
-                for (size_t j = i; j < data[0].length(); j++) diagonal << data[j - i][j];
-                diagonals.push_back(diagonal.str()); diagonal.str("");
-            }
-
-            for (size_t j = i; j < data[0].length(); j++) diagonal << data[j][j - i];
-
-            diagonals.push_back(diagonal.str());
-        }
-
-        return countMatches(diagonals);
-    };
-
-    return countMatches(input) +
-           countMatches(transposed) +
-           countDiagonalMatches(input) +
-           countDiagonalMatches(transposed);
+    return counts;
 }
 
 int main() {
     auto input = getInput();
 
-    std::cout << "Part One: " << partOne(input) << std::endl;
+    std::cout << "Part One: " << partOne(input) << "\nPart Two: " << partTwo(input) << std::endl;
 
     return 0;
 }
