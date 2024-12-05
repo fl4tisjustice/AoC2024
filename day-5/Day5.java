@@ -50,21 +50,16 @@ public class Day5 {
         final BinaryOperator<Boolean> combinator = (op1, op2) -> valid ? op1 && op2 : op1 || op2;
         
         return Arrays.stream(input.updates)
-                     .filter(update -> IntStream.range(0, update.length).boxed().reduce(
-                        valid,
-                        (pageAccum, pageIdx) -> {
-                            boolean updateValidity =
-                                Arrays.stream(input.rules).filter(rule -> rule[0] == update[pageIdx]).reduce(
-                                    valid,
-                                    (accum, rule) -> {
-                                        boolean pageValidity = IntStream.of(Arrays.copyOfRange(update, 0, pageIdx)).anyMatch(page -> page == rule[1]);
-                                        return valid ? accum && !pageValidity : accum || pageValidity;
-                                    },
-                                    combinator
-                            );
-                            return valid ? pageAccum && updateValidity : pageAccum || updateValidity;
-                        },
-                        combinator))
+                     .filter(update -> IntStream.range(0, update.length).boxed()
+                     .reduce(valid, (pageAccum, pageIdx) -> {
+                        boolean updateValidity =
+                            Arrays.stream(input.rules)
+                                  .filter(rule -> rule[0] == update[pageIdx])
+                                  .reduce( valid, (accum, rule) -> {
+                                      boolean pageValidity = IntStream.of(Arrays.copyOfRange(update, 0, pageIdx)).anyMatch(page -> page == rule[1]);
+                                      return valid ? accum && !pageValidity : accum || pageValidity;
+                                  }, combinator);
+                        return valid ? pageAccum && updateValidity : pageAccum || updateValidity; }, combinator))
                      .collect(Collectors.toList());
     }
 
@@ -74,23 +69,23 @@ public class Day5 {
     }
 
     public static int partTwo(final ProblemInput input) {
-        return
-            filterUpdates(input, false).stream()
-                .reduce(0, (accum, update) -> {
-                    List<int[]> relevantRules = Arrays.stream(input.rules)
-                        .filter(rule -> IntStream.of(update).anyMatch(page -> page == rule[0] && IntStream.of(update).anyMatch(_page -> _page == rule[1])))
-                        .collect(Collectors.toList());
+        return filterUpdates(input, false).stream()
+                    .reduce(0, (accum, update) -> {
+                        List<int[]> relevantRules = Arrays.stream(input.rules)
+                            .filter(rule -> IntStream.of(update).anyMatch(page ->
+                                page == rule[0] && IntStream.of(update).anyMatch(_page -> _page == rule[1])))
+                            .collect(Collectors.toList());
 
-                    return accum + relevantRules.stream()
-                        .map(rule -> rule[0])
-                        .distinct()
-                        .sorted((Integer pageOne, Integer pageTwo) ->
-                            Long.compare(
-                                relevantRules.stream().filter(rule -> rule[0] == pageTwo).count(),
-                                relevantRules.stream().filter(rule -> rule[0] == pageOne).count()
-                            ))
-                        .collect(Collectors.toList()).get(update.length / 2);
-                }, Integer::sum);
+                        return accum + relevantRules.stream()
+                            .map(rule -> rule[0])
+                            .distinct()
+                            .sorted((Integer pageOne, Integer pageTwo) ->
+                                Long.compare(
+                                    relevantRules.stream().filter(rule -> rule[0] == pageTwo).count(),
+                                    relevantRules.stream().filter(rule -> rule[0] == pageOne).count()
+                                ))
+                            .collect(Collectors.toList()).get(update.length / 2);
+                    }, Integer::sum);
     }
 
     public static void main(String[] args) {
