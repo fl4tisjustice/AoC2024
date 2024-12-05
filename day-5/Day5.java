@@ -23,18 +23,16 @@ public class Day5 {
         try {
             Scanner input = new Scanner(new File("day-5/input.txt"));
 
-            ArrayList<int[]> rules = new ArrayList<int[]>();
-            ArrayList<int[]> updates = new ArrayList<int[]>();
+            ArrayList<int[]> rules = new ArrayList<>();
+            ArrayList<int[]> updates = new ArrayList<>();
 
-            while (input.hasNext("[1-9][0-9]*?\\|[1-9][0-9]*")) {
-                String[] line = input.nextLine().split("\\|");
-                rules.add(new int[] { Integer.parseInt(line[0]), Integer.parseInt(line[1]) });
-            }
+            while (input.hasNext("[1-9][0-9]*?\\|[1-9][0-9]*"))
+                rules.add(Arrays.stream(input.nextLine().split("\\|")).mapToInt(Integer::parseInt).toArray());
 
             input.nextLine();
 
             while (input.hasNextLine())
-                updates.add(Arrays.stream(input.nextLine().split(",")).<Integer>map(Integer::parseInt).mapToInt(Integer::intValue).toArray());
+                updates.add(Arrays.stream(input.nextLine().split(",")).mapToInt(Integer::parseInt).toArray());
 
             input.close();
 
