@@ -6,7 +6,7 @@
 #include <algorithm>
 
 std::vector<std::string> getInput() {
-    std::ifstream file("input.txt");
+    std::ifstream file("day-4/input.txt");
     std::vector<std::string> input;
     std::string line;
 
