@@ -140,7 +140,7 @@ int part_two(const char **traversed, long board_size) {
 
     for (long row = 0; row < board_size; row++) {
         for (long col = 0; col < board_size; col++) {
-            if (!strchr("#.", traversed[row][col]) &&  !(row == guard_pos.row && col == guard_pos.col)) {
+            if (!strchr("#.", traversed[row][col]) && !(row == guard_pos.row && col == guard_pos.col)) {
                 playground[row][col] = '#';
                 loops += (int)!traverse(playground, board_size);
                 for (long i = 0; i < board_size; i++) strcpy(playground[i], initial_board[i]);
