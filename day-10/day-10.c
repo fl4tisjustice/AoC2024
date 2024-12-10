@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
+#define INPUT_SIZE 50
 #define MOVE_COUNT 4
 #define CHECK_VALID_PTR(ptr)                                                                \
     do {                                                                                    \
@@ -66,7 +67,7 @@ void deque_push(struct deque *deque, struct board_position node) {
         memmove(deque->base, deque->base + deque->offset, deque->count * sizeof(struct board_position));
         deque->offset = 0;
     }
-    if (deque->base + deque->count == deque->end) {
+    if (deque->base + deque->count >= deque->end) {
         fprintf(stderr, "Max deque size (%u) reached when trying to push (%d, %d).\n", deque->count, node.row, node.col);
         exit(EXIT_FAILURE);
     }
@@ -89,7 +90,7 @@ struct board_position deque_pop(struct deque *deque) {
 }
 
 int8_t get_input(char*** const board) {
-    FILE *file = fopen("day-10/input.txt", "r");
+    FILE *file = fopen("/home/fl4t/Documents/AoC2024/day-10/input.txt", "r");
     if (!file) { perror("fopen"); return -1; }
 
     while (fgetc(file) != '\n');
@@ -148,7 +149,7 @@ int trailhead_bfs(struct deque *deque, char **board, int8_t size, struct board_p
 }
 
 int measure(char **board, int8_t size, bool rating) {
-    unsigned short length = (unsigned short)(size * size);
+    unsigned short length = (unsigned short)(INPUT_SIZE * INPUT_SIZE); // idk
 
     int total_score = 0;
 
