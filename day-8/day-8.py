@@ -1,6 +1,6 @@
+from __future__ import annotations
 from itertools import combinations
 from typing import Generator, Self
-from __future__ import annotations
 
 class Vector2D:
     def __init__(self : Self, x : int, y : int):
@@ -47,7 +47,7 @@ def resonance(coordinate : Vector2D, vector : Vector2D, dimensions : tuple[int, 
         yield coordinate
         coordinate += vector
 
-def count_antinodes(antennas : dict[str, list[Vector2D]], dimensions : tuple[int, int], resonance_active : bool = False) -> int:
+def count_antinodes(antennas : dict[str, list[Vector2D]], dimensions : tuple[int, int], *, resonance_active : bool = False) -> int:
     antinodes = set()
     for frequency in antennas.keys():
         for first, second in combinations(antennas[frequency], 2):
@@ -60,7 +60,7 @@ def count_antinodes(antennas : dict[str, list[Vector2D]], dimensions : tuple[int
 
 def main() -> None:
     antennas, dimensions = get_input()
-    print(f"Part One: { count_antinodes(antennas, dimensions) }\nPart Two { count_antinodes(antennas, dimensions, True)}")
+    print(f"Part One: { count_antinodes(antennas, dimensions) }\nPart Two { count_antinodes(antennas, dimensions, resonance_active=True)}")
 
 if __name__ == "__main__":
     main()
