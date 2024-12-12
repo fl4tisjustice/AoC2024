@@ -90,7 +90,7 @@ struct board_position deque_pop(struct deque *deque) {
 }
 
 int8_t get_input(char*** const board) {
-    FILE *file = fopen("/home/fl4t/Documents/AoC2024/day-10/input.txt", "r");
+    FILE *file = fopen("day-10/input.txt", "r");
     if (!file) { perror("fopen"); return -1; }
 
     while (fgetc(file) != '\n');
