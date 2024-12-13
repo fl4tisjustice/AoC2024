@@ -18,12 +18,6 @@ class Vector2D:
     def __eq__(self : Self, other: Vector2D) -> bool:
         return self.x == other.x and self.y == other.y
     
-    def __mul__(self : Self, scalar : int):
-        return Vector2D(self.x * scalar, self.y * scalar)
-
-    def __div__(self: Self, scalar: int):
-        return Vector2D(self.x // scalar, self.y // scalar)
-
     def __hash__(self : Self) -> int:
         return hash((self.x, self.y))
     
@@ -32,7 +26,6 @@ def min_tokens_to_prize(a: Vector2D, b: Vector2D, prize: Vector2D) -> int:
     if prize.x < 0 or prize.y < 0: return float('inf')
     if prize.x == 0 and prize.y == 0: return 0
     return min(3 + min_tokens_to_prize(a, b, prize - a), 1 + min_tokens_to_prize(a, b, prize - b))
-
 
 def get_input() -> list[tuple[Vector2D, Vector2D, Vector2D]]:
     with open("day-13/input.txt", "r") as file:
@@ -74,12 +67,6 @@ def part_two(claw_machines: list[tuple[Vector2D, Vector2D, Vector2D]]):
 def main() -> None:
     claw_machines = get_input()
     print(f"Part One: { part_one(claw_machines) }\nPart Two: { part_two(claw_machines) }")
-
-# Button A: X+94, Y+34
-# Button B: X+22, Y+67
-# Prize: X=8400, Y=5400
-
-
 
 if __name__ == "__main__":
     main()
