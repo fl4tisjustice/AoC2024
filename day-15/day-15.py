@@ -12,6 +12,9 @@ class Vector2D:
     
     def __sub__(self: Self, other: Vector2D) -> Vector2D:
         return Vector2D(self.x - other.x, self.y - other.y)
+    
+    def __mul__(self : Self, scalar: int) -> Vector2D:
+        return Vector2D(self.x * scalar, self.y * scalar)
 
     def __eq__(self : Self, other: Vector2D) -> bool:
         return self.x == other.x and self.y == other.y
@@ -35,12 +38,22 @@ def get_direction(move: str) -> Vector2D:
         case '<': return Vector2D(-1, 0)
         case '>': return Vector2D( 1, 0)
 
-def try_push(board: str, check: Vector2D, toward: Vector2D) -> bool:
+def try_push(board: list[list[str]], check: Vector2D, toward: Vector2D) -> bool:
     next: Vector2D = check + toward
     if board[next.y][next.x] == '#': return False
     if board[next.y][next.x] == '.' or try_push(board, next, toward):
-        board[next.y][next.x] = 'O'
+        board[next.y][next.x] = board[check.y][check.x]
         return True
+
+def get_gps_sum(board: list[list[str]]) -> int:
+    gps_sum: int = 0
+
+    for row, line in enumerate(board):
+        for col, cell in enumerate(line):
+            if cell == 'O' or cell == '[':
+                gps_sum += 100 * row + col
+
+    return gps_sum
 
 def part_one(board: list[list[str]], moves: str) -> int:
     robot = get_robot(board)
@@ -54,14 +67,7 @@ def part_one(board: list[list[str]], moves: str) -> int:
             board[check.y][check.x] = '@'
             robot = check
 
-    gps_sum: int = 0
-
-    for row, line in enumerate(board):
-        for col, cell in enumerate(line):
-            if cell == 'O':
-                gps_sum += 100 * row + col
-
-    return gps_sum
+    return get_gps_sum(board)
 
 def transform(board: list[list[str]]) -> list[list[str]]:
     new_board: list[list[str]] = []
@@ -73,70 +79,66 @@ def transform(board: list[list[str]]) -> list[list[str]]:
             else: new_board[row] += ['@', '.']
     return new_board
 
-# def try_push_expanded(board: str, check: Vector2D, toward: Vector2D, no_check: bool = False) -> bool:
-#     next: Vector2D = check + toward
-#     if board[next.y][next.x] == '#': return False
-#     if toward.x != 0 and (board[next.y][next.x] == '.' or try_push_expanded(board, next, toward)):
-#         board[next.y][next.x] = board[check.y][check.x]
-#         return True
-#     if toward.y != 0 and board[next.y][next.x] == '.':
+def try_push_vertical(board: list[list[str]], left: Vector2D, toward: Vector2D, no_move: bool = False) -> bool:
+    right: Vector2D = left + get_direction('>')
+    check_left: Vector2D = left + toward
+    check_right: Vector2D = right + toward
+    if board[check_left.y][check_left.x] == '#' or board[check_right.y][check_right.x] == '#': return False
+    if board[check_left.y][check_left.x] == '.' and board[check_right.y][check_right.x] == '.':
+        if no_move: return True
+        board[check_left.y][check_left.x] = '['
+        board[check_right.y][check_right.x] = ']'
+
+        board[left.y][left.x] = '.'
+        board[right.y][right.x] = '.'
+        return True
+    else:
+        left_free: bool = board[check_left.y][check_left.x] == '.'
+        right_free: bool = board[check_right.y][check_right.x] == '.'
+
+        left_delta: Vector2D = Vector2D(0, 0)
+        right_delta: Vector2D = Vector2D(0, 0)
         
-#         other_half: str = '[' if board[check.y][check.x] == ']' else ']'
-#         other_half_delta: Vector2D = get_direction('<' if board[check.y][check.x] == ']' else '>')
-#         other_half_pos: Vector2D = other_half_delta + next
+        if not left_free and board[check_left.y][check_left.x] == ']': left_delta = get_direction('<')
+        if not right_free and board[check_right.y][check_right.x] == ']': right_delta = get_direction('<')
+
+        blocked_left: Vector2D = check_left + left_delta
+        blocked_right: Vector2D = check_right + right_delta
+
+        if (left_free or try_push_vertical(board, blocked_left, toward, True)) and (right_free or blocked_left == blocked_right or try_push_vertical(board, blocked_right, toward, True)):
+            if no_move: return True
+            if board[blocked_left.y][blocked_left.x] != '.': try_push_vertical(board, blocked_left, toward)
+            if board[blocked_right.y][blocked_right.x] != '.' and blocked_left != blocked_right: try_push_vertical(board, blocked_right, toward)
+
+            return try_push_vertical(board, left, toward)
         
-#         if board[other_half_pos.y][other_half_pos.x] == '#': return False
-#         if board[other_half_pos.y][other_half_pos.x] == '.':
-#             if no_check: return True
+    return False
 
-#             # Move
-#             board[next.y][next.x] = board[check.y][check.x]
-#             board[other_half_pos.y][other_half_pos.x] = other_half
+def part_two(board: list[list[str]], moves: str) -> int:
+    new_board: list[list[str]] = transform(board)
+    robot = get_robot(new_board)
 
-#             # Erase previous
-#             prev: Vector2D = other_half_delta + check
-#             board[check.y][check.x] = '.'
-#             board[prev.y][prev.x] = '.'
-#             return True
-#     if toward.y != 0:
-#         if board[next.y][next.x] == board[check.y][check.x] and try_push_expanded(board, next, toward):
-#             try_push_expanded(board, check, toward)
-#             return True
-#         elif board[next.y][next.x] != board[check.y][check.x]:
-#             extra: Vector2D = get_direction('<' if board[next.y][next.x] == '[' else '>') + next;
-#             if try_push_expanded(board, next, toward, True) and try_push_expanded(board, extra, toward, True):
-#                 if board[next.y][next.x] != '.': try_push_expanded(board, next, toward)
-#                 if board[extra.y][extra.x] != '.': try_push_expanded(board, extra, toward)
-#                 try_push_expanded(board, check, toward)
-#                 return True
-#     return False
+    for move in moves:
+        direction: Vector2D = get_direction(move)
+        check: Vector2D = robot + direction
+        if new_board[check.y][check.x] == '#': continue
+        if new_board[check.y][check.x] == '.' or (direction.x != 0 and try_push(new_board, check, direction)):
+            # Horizontal
+            new_board[robot.y][robot.x] = '.'
+            new_board[check.y][check.x] = '@'
+            robot = check
+            continue
+        if direction.y != 0:
+            # Vertical
+            # Always check the left one for consistency
+            left: Vector2D = check if new_board[check.y][check.x] == '[' else check + get_direction('<')
 
-# def part_two(board: list[list[str]], moves: str) -> int:
-#     new_board: list[list[str]] = transform(board)
-#     robot = get_robot(new_board)
+            if try_push_vertical(new_board, left, direction):
+                new_board[robot.y][robot.x] = '.'
+                new_board[check.y][check.x] = '@'
+                robot = check
 
-#     for move in moves:
-#         print('\n'.join(''.join(line) for line in new_board))
-#         direction: Vector2D = get_direction(move)
-#         check: Vector2D = robot + direction
-#         if new_board[check.y][check.x] == '#': continue
-#         if new_board[check.y][check.x] == '.':
-#             new_board[robot.y][robot.x] = '.'
-#             new_board[check.y][check.x] = '@'
-#             robot = check
-#             continue
-#         if try_push_expanded(new_board, check, direction):
-#             new_board[robot.y][robot.x] = '.'
-#             # Vertical
-#             if direction.x == 0:
-#                 confirm_half: Vector2D = check + direction
-#                 leftover_box_pos: Vector2D = get_direction('>' if new_board[confirm_half.y][confirm_half.x] == '[' else '<') + check
-#                 new_board[leftover_box_pos.y][leftover_box_pos.x] = '.'
-#             new_board[check.y][check.x] = '@'
-#             robot = check
-
-#     print('\n'.join(''.join(line) for line in new_board))
-
+    return get_gps_sum(new_board)
 
 def get_input() -> tuple[list[list[str]], str]:
     with open("day-15/input.txt", "r") as file:
@@ -145,8 +147,7 @@ def get_input() -> tuple[list[list[str]], str]:
 
 def main() -> None:
     board, moves = get_input()
-
-    print(f"Part One: { part_one(deepcopy(board), moves) }")
+    print(f"Part One: { part_one(deepcopy(board), moves) }\nPart Two: { part_two(deepcopy(board), moves) }")
 
 if __name__ == "__main__":
     main()
