@@ -91,7 +91,7 @@ uint64_t find_quine(enum opcode *program, unsigned int instruction_count, uint64
     }
 
     // Only free in the topmost call, where it was allocated
-    // (Onlt the caller changes the value of buf)
+    // (Only the caller changes the value of buf)
     if (!buf) free(buf);
     return 0;
 }
