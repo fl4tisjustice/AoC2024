@@ -48,9 +48,11 @@ def get_cell(board: list[list[str]], unique: str) -> Vector2D:
         for col, cell in enumerate(line):
             if cell == unique: return Vector2D(col, row)
 
-def dijkstra(board: list[list[str]], from_cell: Vector2D, from_direction: Direction) -> tuple[defaultdict[(Vector2D, Direction), int], dict[Vector2D, set[Vector2D]]]:
+def dijkstra(board: list[list[str]], from_cell: Vector2D, from_direction: Direction) -> \
+    tuple[defaultdict[(Vector2D, Direction), int], defaultdict[(Vector2D, Direction), set[(Vector2D, Direction)]]]:
+
     dist: defaultdict[(Vector2D, Direction), int] = defaultdict(lambda: float('inf'))
-    prev: defaultdict[(Vector2D, Direction), (Vector2D, Direction)] = defaultdict(set)
+    prev: defaultdict[(Vector2D, Direction), set[(Vector2D, Direction)]] = defaultdict(set)
 
     queue = [(0, from_cell, from_direction)]
     dist[(from_cell, from_direction)] = 0
@@ -79,11 +81,11 @@ def dijkstra(board: list[list[str]], from_cell: Vector2D, from_direction: Direct
 
     return dist, prev
 
-def unique_path_cells(prev: dict[Vector2D, set[Vector2D]], end: Vector2D, direction: Direction):
+def unique_path_cells(prev: defaultdict[(Vector2D, Direction), set[(Vector2D, Direction)]], end: Vector2D, direction: Direction):
     queue: deque[Vector2D] = deque()
     queue.append((end, direction))
 
-    visited: set[Vector2D] = { (end, direction) }
+    visited: set[(Vector2D, Direction)] = { (end, direction) }
     unique: set[Vector2D] = { end }
     
     while len(queue):
