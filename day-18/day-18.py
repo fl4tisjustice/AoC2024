@@ -81,22 +81,23 @@ def part_one(byte_list: list[Vector2D]) -> int:
     dist = dijkstra(board, Vector2D(0, 0))
     return dist[Vector2D(70, 70)]    
 
-def part_two(byte_list: list[Vector2D]) -> Vector2D:
+def part_two(byte_list: list[Vector2D]) -> str:
     left: int = 0;
     right: int = len(byte_list)
     mid: int
 
     while left < right:
-        mid = left + (right - left) // 2
+        mid = (left + right) // 2
         board: list[list[str]] = [['.' for _ in range(71)] for _ in range(71)]
-        for byte in byte_list[:mid]: board[byte.y][byte.x] = '#'
+        for byte in byte_list[:mid + 1]: board[byte.y][byte.x] = '#'
         dist = dijkstra(board, Vector2D(0, 0))
         if dist[Vector2D(70, 70)] == float('inf'):
             right = mid
         else:
             left = mid + 1
 
-    return byte_list[left - 1]
+    obstacle: Vector2D = byte_list[left]
+    return f"{ obstacle.x },{ obstacle.y }"
 
 def main() -> None:
     byte_list: list[Vector2D] = get_input()
