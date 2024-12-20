@@ -1,7 +1,7 @@
 from functools import partial, cache
 
 def get_input() -> tuple[tuple[str], list[str]]:
-    with open("/home/fl4t/Documents/AoC2024/day-19/input.txt", 'r') as file:
+    with open("day-19/input.txt", 'r') as file:
         towels, patterns = file.read().split("\n\n")
     return tuple(towels.split(", ")), patterns.split('\n')
 
