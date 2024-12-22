@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Self
 from enum import IntEnum
 from collections import defaultdict
+from itertools import combinations
 from math import sqrt
 import heapq
 import re
@@ -56,7 +57,7 @@ def dijkstra(board: list[list[str]], from_cell: Vector2D) -> defaultdict[Vector2
     dist: defaultdict[Vector2D, int] = defaultdict(lambda: float('inf'))
 
     queue = [(0, from_cell)]
-    dist[(from_cell)] = 0
+    dist[from_cell] = 0
     
     while len(queue):
         _, cell = heapq.heappop(queue)
@@ -85,11 +86,7 @@ def transpose(board: list[list[str]]) -> list[list[str]]:
             transposed[col].append(board[row][col])
     return transposed
 
-def part_one(board: list[str]) -> int:
-    start: Vector2D = get_cell(board, 'S')
-
-    dist: defaultdict[Vector2D, int] = dijkstra(board, start)
-
+def part_one(board: list[str], dist: defaultdict[Vector2D, int]) -> int:
     exploitable: list[tuple[Vector2D, int, bool]] = []
     pattern: re.Pattern[str] = re.compile(r"[.ES]#{1,2}(?=[.ES])")
 
@@ -108,10 +105,29 @@ def part_one(board: list[str]) -> int:
 
     return sum(map(lambda x : x[1], filter(lambda x : x[0] >= 100, timesaves.items())))
 
+def part_two(board: list[list[str]], dist: defaultdict[Vector2D, int]) -> int:
+    timesaves = defaultdict(lambda: 0)
+    normal_track: set[Vector2D] = set()
+
+    for row, line in enumerate(board):
+        for col, cell in enumerate(line):
+            if cell in ".ES":
+                normal_track.add(Vector2D(col, row))
+
+    for cmp1, cmp2 in combinations({normal_track}, 2):
+        diff: Vector2D = cmp1 - cmp2
+        distance: int = abs(diff.x) + abs(diff.y)
+        if distance > 20: continue
+        timesaves[abs(dist[cmp1] - dist[cmp2]) - distance] += 1
+    
+    return sum(map(lambda x : x[1], filter(lambda x : x[0] >= 100, timesaves.items())))
 
 def main() -> None:
     board: list[list[str]] = get_input()
-    print(f"Part One: { part_one(board) }")
+    start: Vector2D = get_cell(board, 'S')
+    dist: defaultdict[Vector2D, int] = dijkstra(board, start)
+    
+    print(f"Part One: { part_one(board, dist) }\nPart Two: { part_two(board, dist) }")
 
 if __name__ == "__main__":
     main()
