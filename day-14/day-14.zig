@@ -50,7 +50,6 @@ fn getInput(allocator: std.mem.Allocator) []const Robot(i64) {
     defer robots.deinit();
 
     while (file.reader().readUntilDelimiterOrEofAlloc(allocator, '\n', std.math.maxInt(usize)) catch unreachable) |line| {
-        // std.debug.print("{s}", .{ line });
         var matches: [5]re.regmatch_t = undefined;
         _ = re.regexec(regex, @ptrCast(line.ptr), matches.len, @ptrCast(&matches), 0);
 

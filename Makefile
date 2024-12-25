@@ -46,7 +46,7 @@ day-14/regez.so: day-14/regez.c
 	$(CC) $(CFLAGS) -shared -fPIC $^ -o $@
 
 $(ZIG_EXE): %: %.zig
-	$(ZIGC) -I. -lc $(wildcard $(@F)/*.so) $^ -femit-bin=$@
+	$(ZIGC) -I. -lc day-14/regez.so $^ -femit-bin=$@
 
 $(JAVA_EXE): %.class: %.java
 	$(JAVAC) $^
